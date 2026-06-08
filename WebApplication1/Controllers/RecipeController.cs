@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using WebApplication1.interfaces;
 using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
@@ -8,23 +9,39 @@ namespace WebApplication1.Controllers
     [ApiController]
     public class RecipeController : ControllerBase
     {
-        private static List<Recipe> recipes = new List<Recipe>();
+        private readonly IRecipeService _recipeService;
+
+        public RecipeController(IRecipeService recipeService)
+        {
+            _recipeService = recipeService;
+        }
+
         [HttpGet]
         public List<Recipe> Get()
         {
-            return recipes;
+            return _recipeService.GetAllRecipes();
         }
 
         [HttpGet("GetRecipe")]
-        public Recipe GetRecipe(int id) 
+        public ActionResult<Recipe> GetRecipe(int id)
         {
-            return recipes[id];
+            if (id < 0) 
+                return BadRequest("מזהה לא תקין");
+
+            var recipe = _recipeService.GetRecipeById(id);
+            if (recipe == null) 
+                return NotFound("המתכון לא נמצא");
+
+            return Ok(recipe);
         }
+
         [HttpPost]
         public void Add([FromBody] Recipe recipe)
         {
-            recipes.Add(recipe);
-        }
+            if (recipe == null) 
+                return;
 
+            _recipeService.AddRecipe(recipe);
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using WebApplication1.interfaces;
 using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
@@ -8,17 +9,27 @@ namespace WebApplication1.Controllers
     [ApiController]
     public class CategoryController : ControllerBase
     {
-        private static List<Category> categories = new List<Category>();
-
+        private readonly ICategoryService _categoryService;
+        public CategoryController(ICategoryService categoryService)
+        {
+            _categoryService = categoryService;
+        }
         [HttpGet("GetCategory")]
         public List<Category> GetCategory (string name)
         {
-            return categories.Where(w => w.Name.Contains(name)).ToList();
+            if (string.IsNullOrEmpty(name)) 
+                return new List<Category>();
+            return _categoryService.GetCategoriesByName(name);
+        }
+        [HttpGet]
+        public List<Category> Get()
+        {
+            return _categoryService.GetAllCategories();
         }
         [HttpPost]
         public void Add([FromBody] Category category)
         {
-            categories.Add(category);
+            _categoryService.AddCategory(category);
         }
 
 

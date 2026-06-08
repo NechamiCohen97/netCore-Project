@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using WebApplication1.interfaces;
 using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
@@ -8,12 +9,25 @@ namespace WebApplication1.Controllers
     [ApiController]
     public class IngredientController : ControllerBase
     {
-        private static List<Ingredient> ingredients = new List<Ingredient>();
+        private readonly IIngredientService _ingredientService;
+        public IngredientController(IIngredientService ingredientService)
+        {
+            _ingredientService = ingredientService;
+        }
 
         [HttpPost]
         public void Add([FromBody]Ingredient ingredient)
         {
-            ingredients.Add(ingredient);
+            if (ingredient == null) 
+                return;
+            _ingredientService.AddIngredient(ingredient);
+        }
+        [HttpDelete]
+        public void Delete([FromBody] Ingredient ingredient)
+        {
+            if (ingredient == null)
+                return;
+            _ingredientService.DeleteIngredient(ingredient);
         }
     }
 }
